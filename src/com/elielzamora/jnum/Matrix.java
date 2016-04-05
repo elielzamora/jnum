@@ -26,6 +26,16 @@ public class Matrix {
 		}
 		return C;
 	}
+	/** transpose matrix */
+	public static double[][] T(double[][] A){
+		double[][] ATrans = new double[n(A)][m(A)];
+		for(int i=0; i < m(A); i++){
+			for(int j=0; j < n(A); j++){
+				ATrans[j][i] = A[i][j];
+			}
+		}
+		return ATrans;
+	}
 	public static double[][] mult(double[][] A, double[][] B)
 		throws DimentionsIncompatibleException{
 		if(n(A) != m(B)) throw new DimentionsIncompatibleException();
@@ -140,21 +150,27 @@ public class Matrix {
 		int cofactorRow = 0;
 		//cofactor expansion from first row
 		for(int i = 0; i < n(A); i++){
-			determ += cofactor(0,i) * det(minor(A,i,0));
+			determ += A[0][i] * cofactor(0,i) * det(minor(A,i,0));
 		}
 		return determ;//change this
 	}
 	public static void main(String[] args) {
 		double[][] matA	 = {{3,4},
 							{5,1}};
-		double[][] matA1 = {{1,0,0},
+		double[][] matA1 = {{2,0,0},
 							{0,3,4},
 							{0,5,1}};
+		double[][] mat = {{-3,0.25,4,-4},
+						{-5, 2, -20, 3},
+						{6,-180, 7,3},
+						{2,1,-2, 5}};
 		double[][] matB =  {{-1,3},
 							{2,-8}};
 		//System.out.println(minor(matA,1,1)[0][0]);
+		System.out.println(det(matA));
 		System.out.println(det(matA1));
-
+		System.out.println(det(mat));
+		System.out.println(T(matA)[0][1]); // 5
 	}
 
 }
