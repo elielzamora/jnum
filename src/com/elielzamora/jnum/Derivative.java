@@ -7,9 +7,10 @@ public class Derivative {
 		return (y2-y1)/(x2-x1);
 	}
 	public static double prime(Function f, double x, double dx){
-		double d1 = (f.val(x+dx)-f.val(x))/dx;
+		return (f.val(x+dx)-f.val(x-dx))/(2*dx);
+		/*double d1 = (f.val(x+dx)-f.val(x))/dx;
 		double d2 = (f.val(x)-f.val(x-dx))/dx;
-		return (d1+d2)/2;
+		return (d1+d2)/2;*/
 		//return (f.val(x+dx) - f.val(x))/dx;
 		//same as
 		//return slope(x, x+dx, f.val(x), f.val(x+dx));
