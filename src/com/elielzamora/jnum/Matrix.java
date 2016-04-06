@@ -26,6 +26,17 @@ public class Matrix {
 		}
 		return C;
 	}
+	public static double[][] sub(double[][] A, double[][] B)
+			throws DimentionsIncompatibleException{
+		if(n(A) != n(B) || m(A) != m(B)) throw new DimentionsIncompatibleException();
+		double[][] C = new double[m(A)][n(A)];
+		for(int i = 0; i < m(A); i++){
+			for(int j = 0; j < n(A); j++){
+				C[i][j] = A[i][j] - B[i][j];
+			}
+		}
+		return C;
+	}
 	/** transpose matrix */
 	public static double[][] T(double[][] A){
 		double[][] ATrans = new double[n(A)][m(A)];
@@ -110,11 +121,37 @@ public class Matrix {
 		}
 		return C;
 	}
+	public static double[][] strassen(double[][] A, double[][] B) 
+		throws DimentionsIncompatibleException{
+		assert n(A) == n(B) && m(A) == m(B) && squareMatrix(A);
+		if(n(A) == 1) return new double[][]{{A[0][0] * B[0][0]}};
+		assert n(A) % 2 == 0 && m(A) % 2 == 0;
+		double[][] A00 = subMatrix(A,0,0,m(A)/2, n(A)/2);
+		double[][] A10 = subMatrix(A,m(A)/2, 0, m(A), n(A)/2);
+		double[][] A01 = subMatrix(A,0,n(A)/2,m(A)/2, n(A));
+		double[][] A11 = subMatrix(A,m(A)/2, n(A)/2, m(A), n(A));
+		double[][] B00 = subMatrix(B,0,0,m(A)/2, n(A)/2);
+		double[][] B10 = subMatrix(B,m(A)/2, 0, m(A), n(A)/2);
+		double[][] B01 = subMatrix(B,0,n(A)/2,m(A)/2, n(A));
+		double[][] B11 = subMatrix(B,m(A)/2, n(A)/2, m(A), n(A));
+		double[][] M1 = strassen(add(A00,A11),add(B00,B11));
+		double[][] M2 = strassen(add(A10,A11), B00);
+		double[][] M3 = strassen(A00, sub(B01,B11));
+		double[][] M4 = strassen(A11, sub(B10,B00));
+		double[][] M5 = strassen(add(A00, A01), B11);
+		double[][] M6 = strassen(sub(A10, A00),add(B00, B01));
+		double[][] M7 = strassen(sub(A01,A11),add(B10,B11));
+		double[][] C00 = sub(add(M1,M4),add(M5,M7));
+		double[][] C01 = add(M3,M5);
+		double[][] C10 = add(M2,M4);
+		double[][] C11 = add(sub(M1,M2),add(M3,M6));
+		return mergeMatrix(C00,C01,C10,C11);
+	}
 	public static boolean squareMatrix(double[][] A){
 		return m(A) == n(A);
 	}
 	public static double[][] subMatrix(double[][] A, int m0, int n0, int m1, int n1){
-		assert m0 < m1 && n0 < n1 && 0 <= m0 && 0 <= n0 && m1 < m(A) && n1 < n(A);
+		assert m0 < m1 && n0 < n1 && 0 <= m0 && 0 <= n0 && m1 <= m(A) && n1 <= n(A);
 		int dm = m1-m0;
 		int dn = n1-n0;
 		double[][] a = new double[dm][dn];
@@ -124,6 +161,24 @@ public class Matrix {
 			}
 		}
 		return a;
+	}
+	public static double[][] mergeMatrix(	double[][] a00,
+											double[][] a01,
+											double[][] a10,
+											double[][] a11){
+		assert m(a00) == m(a01) && n(a00) == n(a10) && m(a10) == m(a11) && n(a01) == n(a11);
+		int m = m(a00) + m(a10);
+		int n = n(a00) + n(a01);
+		double[][] A = new double[m][n];
+		for(int i = 0; i < m; i++){
+			for(int j = 0; j < n; j++){
+				if(i < m(a00) && j < n(a00)) A[i][j] = a00[i][j];
+				else if(i < m(a00) && n(a00) <= j) A[i][j] = a01[i][j-n(a00)];
+				else if(m(a00) <= i	&& j < n(a00)) A[i][j] = a10[i-m(a00)][j];
+				else A[i][j] = a11[i-m(a00)][j-n(a00)];
+			}
+		}
+		return null;
 	}
 	public static int cofactor(int m, int n){
 		return (n+m) % 2 == 0? 1: -1;
@@ -154,7 +209,16 @@ public class Matrix {
 		}
 		return determ;//change this
 	}
-	public static void main(String[] args) {
+	public static void display(double[][] A){
+		for(int i = 0; i < A.length; i++){
+			for(int j = 0; j < n(A); j++){
+				double k = A[i][j];
+				System.out.print(k + "\t\t\t");
+			}
+			System.out.print('\n');
+		}
+	}
+	public static void main(String[] args) throws DimentionsIncompatibleException {
 		double[][] matA	 = {{3,4},
 							{5,1}};
 		double[][] matA1 = {{2,0,0},
@@ -171,6 +235,14 @@ public class Matrix {
 		System.out.println(det(matA1));
 		System.out.println(det(mat));
 		System.out.println(T(matA)[0][1]); // 5
+		//System.out.println(subMatrix(mat, m(mat)/2,
+		//n(mat)/2, m(mat), n(mat))[0][1]);
+		display(strassen(new double[][]{{4}}, new double[][]{{6}}));
+		try{
+			display(strassen(matA,matA));
+		}catch(Exception e){
+			e.printStackTrace();
+		}//display(strassen(mat,mat));
 	}
 
 }
